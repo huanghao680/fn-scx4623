@@ -1,0 +1,14 @@
+appname               = fn-scx4623
+version               = 1.2.0
+display_name          = SCX-4623 打印复印扫描
+desc                  = 仅适配 Samsung SCX-4623fw（USB 直连）：打印、复印、扫描与预览，碳粉余量估算与实时状态查询（30 种状态码 + 剩余百分比）。
+platform              = all
+source                = thirdparty
+maintainer            = HH
+maintainer_url        = https://github.com/
+os_min_version        = 1.0.0
+desktop_uidir         = ui
+desktop_applaunchname = fn-scx4623.Application
+service_port          = 8372
+checkport             = true
+ctl_stop              = true

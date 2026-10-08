@@ -1,0 +1,9 @@
+{
+    "defaults":
+    {
+        "run-as": "package"
+    },
+    "username": "fn-scx4623",
+    "groupname": "fn-scx4623",
+    "join-groups": ["lp", "scanner"]
+}

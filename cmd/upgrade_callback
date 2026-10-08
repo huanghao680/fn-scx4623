@@ -1,0 +1,16 @@
+#!/bin/bash
+
+### 升级：保留扫描历史与用户配置，仅补齐缺失目录。
+
+PKGVAR="${TRIM_PKGVAR:-/tmp/fn-scx4623}"
+LOG_FILE="${TRIM_PKGVAR}/info.log"
+
+log_msg() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - upgrade: $1" >> "${LOG_FILE}"
+}
+
+mkdir -p "${PKGVAR}/scans"
+mkdir -p "${PKGVAR}/tmp"
+
+log_msg "upgrade: kept existing scans, directories verified"
+exit 0

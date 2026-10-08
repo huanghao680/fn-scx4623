@@ -1,0 +1,22 @@
+#!/bin/bash
+
+### 卸载：由用户在向导中选择是否删除扫描历史。
+
+PKGVAR="${TRIM_PKGVAR:-/tmp/fn-scx4623}"
+LOG_FILE="${TRIM_PKGVAR}/info.log"
+
+log_msg() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - uninstall: $1" >> "${LOG_FILE}"
+}
+
+# wizard/uninstall 会传入 WIZARD_KEEP_SCANS = yes|no
+if [ "${WIZARD_KEEP_SCANS}" = "no" ]; then
+    if [ -d "${PKGVAR}/scans" ]; then
+        rm -rf "${PKGVAR}/scans"
+        log_msg "removed scan history"
+    fi
+else
+    log_msg "kept scan history (default)"
+fi
+
+exit 0

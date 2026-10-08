@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>快速打印复印扫描</title>
+<style>
+:root{
+  --bg:#f4f6f9;--card:#fff;--ink:#1c2430;--sub:#6b7686;--line:#e4e8ee;
+  --brand:#2563eb;--brand-d:#1d4ed8;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;
+  --r:14px;--sh:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:920px;margin:0 auto;padding:18px 16px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+h1{font-size:19px;margin:0;letter-spacing:-.2px}
+.pill{font-size:12px;padding:4px 10px;border-radius:999px;background:#eef2f7;color:var(--sub);
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--sub);flex:none}
+.dot.on{background:var(--ok)}.dot.off{background:var(--bad)}.dot.busy{background:var(--warn)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh);padding:18px;margin-bottom:16px}
+.tabs{display:flex;gap:6px;background:#eceff4;padding:5px;border-radius:12px;margin-bottom:18px}
+.tab{flex:1;text-align:center;padding:10px 6px;border-radius:9px;cursor:pointer;font-size:14.5px;
+  font-weight:600;color:var(--sub);border:0;background:transparent;transition:.15s;user-select:none}
+.tab.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.pane{display:none}.pane.on{display:block}
+
+.row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.field{flex:1;min-width:150px}
+label{display:block;font-size:12.5px;color:var(--sub);margin-bottom:6px;font-weight:600}
+select,input[type=number],input[type=text]{width:100%;padding:9px 11px;border:1px solid var(--line);
+  border-radius:9px;font-size:14.5px;background:#fff;color:var(--ink);outline:none}
+select:focus,input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.chk{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--ink);padding-top:22px}
+.chk input{width:16px;height:16px;accent-color:var(--brand)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;
+  border:0;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:.15s;
+  background:var(--brand);color:#fff}
+.btn:hover{background:var(--brand-d)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:#f6f8fa}
+.btn.sm{padding:7px 13px;font-size:13.5px;border-radius:8px}
+.btn.danger{background:#fff;color:var(--bad);border:1px solid #fecaca}
+.btn.danger:hover{background:#fef2f2}
+.btn.full{width:100%;padding:14px;font-size:16px}
+
+.drop{border:2px dashed var(--line);border-radius:12px;padding:34px 16px;text-align:center;
+  color:var(--sub);cursor:pointer;transition:.15s;background:#fbfcfe}
+.drop:hover,.drop.over{border-color:var(--brand);background:#f0f5ff;color:var(--brand)}
+.drop b{display:block;font-size:15.5px;color:var(--ink);margin-bottom:5px}
+.drop.over b{color:var(--brand)}
+.fname{margin-top:10px;font-size:13.5px;color:var(--brand);font-weight:600;word-break:break-all}
+
+.note{font-size:13px;color:var(--sub);background:#f7f9fc;border:1px solid var(--line);
+  border-radius:9px;padding:10px 12px;margin-top:12px}
+.note b{color:var(--ink)}
+
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
+  background:#111827;color:#fff;padding:12px 20px;border-radius:11px;font-size:14.5px;
+  opacity:0;pointer-events:none;transition:.25s;max-width:88vw;z-index:60;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{background:var(--bad)}
+
+.spin{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;
+  border-radius:50%;animation:sp .7s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:13px}
+.sitem{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#fff;cursor:pointer;
+  transition:.15s}
+.sitem:hover{border-color:var(--brand);box-shadow:0 4px 14px rgba(37,99,235,.13);transform:translateY(-2px)}
+.sitem .ph{aspect-ratio:3/4;background:#eef1f5;position:relative;overflow:hidden}
+.sitem .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.sitem .ph .badge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.62);color:#fff;
+  font-size:11px;padding:2px 7px;border-radius:6px}
+.sitem .meta{padding:9px 10px}
+.sitem .t{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sitem .d{font-size:11.5px;color:var(--sub);margin-top:2px}
+.empty{text-align:center;color:var(--sub);padding:40px 16px;font-size:14.5px}
+.empty .big{font-size:36px;margin-bottom:8px}
+
+/* 预览 */
+#pv{position:fixed;inset:0;background:rgba(10,14,20,.93);z-index:80;display:none;
+  flex-direction:column;align-items:center;justify-content:center;padding:16px}
+#pv.on{display:flex}
+#pv .box{background:#fff;border-radius:12px;max-width:min(94vw,900px);max-height:74vh;overflow:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#pv .box img{display:block;max-width:100%;height:auto}
+#pv .bar{display:flex;gap:9px;align-items:center;margin-top:14px;flex-wrap:wrap;justify-content:center}
+#pv .ttl{color:#fff;font-size:14.5px;margin-bottom:11px;text-align:center;max-width:90vw}
+.nav{width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;
+  font-size:19px;cursor:pointer}
+.nav:hover{background:rgba(255,255,255,.3)}
+.pgn{color:#e5e7eb;font-size:14px;min-width:56px;text-align:center}
+#pv .btn.ghost{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.25)}
+#pv .btn.ghost:hover{background:rgba(255,255,255,.26)}
+#pv .btn.danger{background:rgba(255,255,255,.14);color:#ff9d9d;border-color:rgba(255,120,120,.35)}
+
+.h2{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.h2 h2{font-size:15.5px;margin:0}
+.bar{height:9px;background:#e9edf3;border-radius:99px;overflow:hidden;margin-top:7px}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:.35s}
+.bar i.warn{background:var(--warn)}
+.bar i.low{background:var(--bad)}
+.bar i.na{background:#c3cad4;width:100%!important}
+.sup{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.sup .nm{font-size:14.5px;font-weight:600}
+.sup .pc{font-size:20px;font-weight:700;letter-spacing:-.5px}
+.sup .pc small{font-size:12px;font-weight:600;opacity:.6}
+.sup .nt{font-size:12.5px;color:var(--sub);margin-top:5px;line-height:1.5}
+.tag{font-size:11px;padding:2px 8px;border-radius:6px;background:#eef2f7;color:var(--sub);font-weight:600}
+.tag.ok{background:#e7f6ec;color:var(--ok)}
+.tag.warn{background:#fdf3e3;color:var(--warn)}
+.form{display:none;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+.form.on{display:flex}
+.form .field{min-width:130px}
+@media(max-width:520px){
+  .wrap{padding:14px 12px 50px}
+  .field{min-width:calc(50% - 7px)}
+  .chk{padding-top:0;min-width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🖨️ 打印 · 复印 · 扫描</h1>
+    <span class="pill"><i class="dot" id="pdot"></i><span id="pstate">检测中…</span></span>
+  </header>
+
+  <!-- 耗材 -->
+  <div class="card" id="sup-card">
+    <div class="h2">
+      <h2>🔋 耗材余量与寿命</h2>
+      <button class="btn ghost sm" id="sup-btn">登记换粉</button>
+    </div>
+    <div id="sup-body"><div class="empty" style="padding:18px"><div class="big">⏳</div>加载中…</div></div>
+    <div class="form" id="sup-form">
+      <div class="field"><label>耗材名称</label>
+        <input type="text" id="sf-name" placeholder="如：MLT-D1043S 墨粉"></div>
+      <div class="field"><label>额定寿命（页）</label>
+        <input type="number" id="sf-life" placeholder="如：1500" min="1"></div>
+      <div class="field"><label>面板当前总页数</label>
+        <input type="number" id="sf-pages" placeholder="菜单里查 Supplies Life" min="0"></div>
+      <div class="field" style="min-width:100%">
+        <div class="chk" style="padding-top:0">
+          <button class="btn sm" id="sf-save">保存</button>
+          <button class="btn ghost sm" id="sf-cancel">取消</button>
+        </div>
+      </div>
+    </div>
+    <div class="note"><span id="sup-hint"></span>
+      <br>面板查询路径：<b>Menu → System Setup → Maintenance → Supplies Life</b>，
+      <b>Total</b> = 总打印页数（填上面），<b>Supplies Info</b> 可打印耗材信息页。</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-p="scan">扫描</button>
+    <button class="tab" data-p="copy">复印</button>
+    <button class="tab" data-p="print">打印</button>
+  </div>
+
+  <!-- 扫描 -->
+  <section class="pane on" id="p-scan">
+    <div class="card">
+      <div class="row">
+        <div class="field"><label>分辨率</label>
+          <select id="s-dpi"><option>150</option><option selected>200</option><option>300</option><option>600</option></select></div>
+        <div class="field"><label>色彩</label>
+          <select id="s-mode"><option value="Color">彩色</option><option value="Gray">灰度</option><option value="Lineart">黑白线条</option></select></div>
+        <div class="field"><label>页数</label>
+          <select id="s-pages"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>10</option></select></div>
+        <div class="field"><label>任务名称（可选）</label>
+          <input type="text" id="s-title" placeholder="如：2025真题612"></div>
+      </div>
+      <button class="btn full" id="btn-scan">开始扫描</button>
+      <div class="note">扫描前请把原稿<strong>面朝下</strong>放在扫描仪玻璃上，盖好盖板。完成后可在下方历史中预览、下载 PDF。</div>
+    </div>
+    <div class="card">
+      <div class="h2"><h2>扫描历史</h2>
+        <button class="btn ghost sm" id="btn-refresh">刷新</button></div>
+      <div class="sgrid" id="grid"></div>
+      <div class="empty" id="empty" style="display:none"><div class="big">📄</div>暂无记录，先扫一张试试</div>
+    </div>
+  </section>
+
+  <!-- 复印 -->
+  <section class="pane" id="p-copy">
+    <div class="card">
+      <div class="row">
+        <div class="field"><label>分辨率</label>
+          <select id="c-dpi"><option>150</option><option selected>200</option><option>300</option></select></div>
+        <div class="field"><label>色彩</label>
+          <select id="c-mode"><option value="Gray">灰度（复印常用）</option><option value="Color">彩色</option></select></div>
+        <div class="field"><label>页数</label>
+          <select id="c-pages"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="field"><label>份数</label>
+          <select id="c-copies"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      </div>
+      <button class="btn full" id="btn-copy">开始复印</button>
+      <div class="note">复印 = <b>扫描 + 直接打印</b>，一次完成。原稿请面朝下放好。</div>
+    </div>
+  </section>
+
+  <!-- 打印 -->
+  <section class="pane" id="p-print">
+    <div class="card">
+      <div class="drop" id="drop">
+        <b>点击选择 或 拖入文件</b>
+        支持 PDF、PNG、JPG 等，最大 100 MB
+        <div class="fname" id="fname"></div>
+      </div>
+      <input type="file" id="file" accept=".pdf,.png,.jpg,.jpeg,.bmp,.tif,.tiff,.webp" hidden>
+      <div class="row" style="margin-top:14px">
+        <div class="field"><label>份数</label>
+          <select id="p-copies"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      </div>
+      <button class="btn full" id="btn-print" disabled>开始打印</button>
+      <div class="note">打印文件会同时存一份到历史记录，方便回看和补打。</div>
+    </div>
+  </section>
+</div>
+
+<!-- 预览 -->
+<div id="pv">
+  <div class="ttl" id="pv-title"></div>
+  <div class="box"><img id="pv-img" alt=""></div>
+  <div class="bar">
+    <button class="nav" id="pv-prev">‹</button>
+    <span class="pgn" id="pv-pgn">1/1</span>
+    <button class="nav" id="pv-next">›</button>
+    <button class="btn ghost sm" id="pv-dl">下载 PDF</button>
+    <button class="btn ghost sm" id="pv-print">打印</button>
+    <button class="btn danger sm" id="pv-del">删除</button>
+    <button class="btn ghost sm" id="pv-close">关闭</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let files=null, cur=null, curPage=1, busy=false;
+
+function toast(m,err){const t=$('#toast');t.textContent=m;t.className='show'+(err?' err':'');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.className='',err?4200:2200);}
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function when(t){const d=new Date(t*1000),n=new Date();
+  const p=x=>String(x).padStart(2,'0');
+  const same=d.toDateString()===n.toDateString();
+  return (same?'今天 ':(d.getMonth()+1)+'月'+d.getDate()+'日 ')+p(d.getHours())+':'+p(d.getMinutes());}
+async function api(url,opt){
+  const r=await fetch(url,opt); let j=null;
+  try{j=await r.json()}catch(e){}
+  if(!r.ok||!j||j.ok===false) throw new Error((j&&j.error)||('HTTP '+r.status));
+  return j;
+}
+function spin(btn,on,label){
+  if(on){btn._h=btn.innerHTML;btn.innerHTML='<span class="spin"></span>'+(label||'处理中…');btn.disabled=true;}
+  else{btn.innerHTML=btn._h||btn.innerHTML;btn.disabled=false;}
+}
+
+/* tabs */
+$$('.tab').forEach(b=>b.onclick=()=>{
+  $$('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  $$('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.p));
+  if(b.dataset.p==='scan') load();
+});
+
+/* status */
+async function status(){
+  try{
+    const s=await api('/api/status');
+    const p=s.printer, ok=p.ok;
+    const reasons=(p.reasons||'').replace(/^none$/,'').trim();
+    $('#pdot').className='dot '+(ok?(p.state==='printing'?'busy':'on'):'off');
+    let txt=ok?(p.state==='printing'?'打印中 · '+p.name:'在线 · '+p.name):'打印机不可用';
+    if(ok&&reasons) txt+=' ⚠ '+reasons;      /* 状态原因原样显示，不翻译 */
+    $('#pstate').textContent=txt;
+    $('#pstate').title=p.detail||'';
+  }catch(e){ $('#pdot').className='dot off'; $('#pstate').textContent='连接失败'; }
+}
+setInterval(status,7000); status();
+
+/* 扫描 */
+$('#btn-scan').onclick=async function(){
+  if(busy)return; busy=true; spin(this,true,'扫描中，请稍候…');
+  try{
+    const j=await api('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({dpi:+$('#s-dpi').value,mode:$('#s-mode').value,
+        pages:+$('#s-pages').value,title:$('#s-title').value})});
+    toast('扫描完成，共 '+j.item.pages+' 页');
+    $('#s-title').value=''; load(); status();
+  }catch(e){ toast(e.message,true); }
+  finally{ busy=false; spin(this,false); }
+};
+
+/* 复印 */
+$('#btn-copy').onclick=async function(){
+  if(busy)return; busy=true; spin(this,true,'复印中，请稍候…');
+  try{
+    const j=await api('/api/copy',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({dpi:+$('#c-dpi').value,mode:$('#c-mode').value,
+        pages:+$('#c-pages').value,copies:+$('#c-copies').value})});
+    toast('复印完成：'+j.scan.pages+' 页 × '+$('#c-copies').value+' 份');
+    status();
+  }catch(e){ toast(e.message,true); }
+  finally{ busy=false; spin(this,false); }
+};
+
+/* 打印 */
+const drop=$('#drop'), fileIn=$('#file');
+drop.onclick=()=>fileIn.click();
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>{ if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+fileIn.onchange=()=>{ if(fileIn.files[0]) setFile(fileIn.files[0]); };
+function setFile(f){ files=f; $('#fname').textContent='已选：'+f.name+'（'+(f.size/1048576).toFixed(1)+' MB）';
+  $('#btn-print').disabled=false; }
+
+$('#btn-print').onclick=async function(){
+  if(!files||busy)return; busy=true; spin(this,true,'提交打印中…');
+  try{
+    const fd=new FormData(); fd.append('file',files); fd.append('copies',$('#p-copies').value);
+    const j=await api('/api/print',{method:'POST',body:fd});
+    toast('已提交打印（'+j.printer+'）');
+    files=null; fileIn.value=''; $('#fname').textContent=''; $('#btn-print').disabled=true;
+    load(); status();
+  }catch(e){ toast(e.message,true); }
+  finally{ busy=false; spin(this,false); }
+};
+
+/* 历史 */
+async function load(){
+  try{
+    const j=await api('/api/scans');
+    const g=$('#grid'); g.innerHTML='';
+    $('#empty').style.display=j.items.length?'none':'block';
+    j.items.forEach(it=>{
+      const el=document.createElement('div'); el.className='sitem';
+      el.innerHTML='<div class="ph">'+
+        (it.pages?`<img loading="lazy" src="/api/scans/${it.id}/thumb/1">`:'')+
+        `<span class="badge">${it.pages||1} 页${it.type==='print'?' · 打印':''}</span></div>`+
+        `<div class="meta"><div class="t">${esc(it.title||'未命名')}</div>
+         <div class="d">${when(it.time)}${it.dpi?' · '+it.dpi+'dpi':''}</div></div>`;
+      el.onclick=()=>open(it);
+      g.appendChild(el);
+    });
+  }catch(e){ toast(e.message,true); }
+}
+$('#btn-refresh').onclick=load;
+
+/* 预览 */
+function open(it){ cur=it; curPage=1; $('#pv').classList.add('on'); render(); }
+function render(){
+  if(!cur)return;
+  $('#pv-title').textContent=(cur.title||'未命名')+' · '+(cur.mode||'-')+(cur.dpi?' · '+cur.dpi+'dpi':'');
+  $('#pv-img').src=`/api/scans/${cur.id}/page/${curPage}?t=${Date.now()}`;
+  $('#pv-pgn').textContent=curPage+'/'+(cur.pages||1);
+  $('#pv-prev').disabled=curPage<=1;
+  $('#pv-next').disabled=curPage>=(cur.pages||1);
+  $('#pv-dl').style.display=cur.pages?'':'none';
+}
+$('#pv-prev').onclick=()=>{ if(curPage>1){curPage--;render();} };
+$('#pv-next').onclick=()=>{ if(curPage<(cur.pages||1)){curPage++;render();} };
+$('#pv-close').onclick=()=>$('#pv').classList.remove('on');
+$('#pv').addEventListener('click',e=>{ if(e.target.id==='pv') $('#pv').classList.remove('on'); });
+document.addEventListener('keydown',e=>{
+  if(!$('#pv').classList.contains('on'))return;
+  if(e.key==='Escape')$('#pv').classList.remove('on');
+  if(e.key==='ArrowLeft')$('#pv-prev').click();
+  if(e.key==='ArrowRight')$('#pv-next').click();
+});
+$('#pv-dl').onclick=()=>{ if(cur) window.open(`/api/scans/${cur.id}/download?fmt=pdf`,'_blank'); };
+$('#pv-print').onclick=async function(){
+  if(!cur)return; const b=this; spin(b,true,'提交中…');
+  try{ await api('/api/scans/reprint',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:cur.id,copies:1})});
+    toast('已提交打印'); status();
+  }catch(e){ toast(e.message,true); } finally{ spin(b,false); }
+};
+$('#pv-del').onclick=async function(){
+  if(!cur)return;
+  if(!confirm('删除这条记录？此操作不可恢复。'))return;
+  const b=this; spin(b,true,'删除中…');
+  try{ await api('/api/scans/'+cur.id,{method:'DELETE'});
+    toast('已删除'); $('#pv').classList.remove('on'); load();
+  }catch(e){ toast(e.message,true); } finally{ spin(b,false); }
+};
+
+/* 耗材 */
+let supMode='reset', supHas=false;
+async function loadSupplies(){
+  try{
+    const d=await api('/api/supplies');
+    supHas=!!(d.items&&d.items.length);
+    $('#sup-btn').textContent=supHas?'更新页数':'登记换粉';
+    const b=$('#sup-body');
+    if(!supHas){
+      b.innerHTML='<div class="empty" style="padding:16px"><div class="big">🖨️</div>暂无耗材记录，点右上角登记</div>';
+    }else{
+      b.innerHTML=d.items.map(it=>{
+        const p=(it.percent===null||it.percent===undefined)?null:it.percent;
+        const cls=p===null?'na':(p<=10?'low':(p<=30?'warn':''));
+        const w=p===null?100:p;
+        const tag=it.source==='usb'?'<span class="tag ok">USB实时</span>'
+                 :it.source==='snmp'?'<span class="tag ok">实时</span>'
+                 :it.source==='state'?'<span class="tag warn">状态位</span>'
+                 :'<span class="tag">估算</span>';
+        const pct=p===null?'—':p;
+        return '<div class="sup">'+
+          '<div style="flex:1;min-width:190px">'+
+            '<div class="nm">'+esc(it.name)+' '+tag+'</div>'+
+            '<div class="bar"><i class="'+cls+'" style="width:'+w+'%"></i></div>'+
+            '<div class="nt">'+esc(it.note||'')+'</div>'+
+          '</div>'+
+          '<div class="pc">'+pct+'<small>%</small></div>'+
+        '</div>';
+      }).join('');
+    }
+    $('#sup-hint').textContent=d.hint||'';
+  }catch(e){ $('#sup-body').innerHTML='<div class="nt" style="color:var(--bad)">'+esc(e.message)+'</div>'; }
+}
+function openSupForm(mode){
+  supMode=mode;
+  $('#sup-form').classList.add('on');
+  const showName=(mode==='reset');
+  $('#sf-name').closest('.field').style.display=showName?'':'none';
+  $('#sf-life').closest('.field').style.display=showName?'':'none';
+  $('#sf-pages').placeholder=showName?'换粉那一刻的面板页数':'打印机面板当前总页数';
+  if(showName){ $('#sf-name').focus(); } else { $('#sf-pages').focus(); }
+}
+$('#sup-btn').onclick=()=>openSupForm(supHas?'update':'reset');
+$('#sf-cancel').onclick=()=>$('#sup-form').classList.remove('on');
+$('#sf-save').onclick=async function(){
+  const pages=parseInt($('#sf-pages').value,10);
+  if(!Number.isFinite(pages)||pages<0){ toast('请填写面板页数',true); return; }
+  let body;
+  if(supMode==='reset'){
+    const life=parseInt($('#sf-life').value,10);
+    if(!Number.isFinite(life)||life<=0){ toast('请填写额定寿命页数',true); return; }
+    body={action:'reset',name:$('#sf-name').value,life_pages:life,pages};
+  }else{
+    body={action:'update',pages};
+  }
+  spin(this,true,'保存中…');
+  try{
+    await api('/api/supplies/manual',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    toast('已保存'); $('#sup-form').classList.remove('on');
+    $('#sf-pages').value=''; loadSupplies();
+  }catch(e){ toast(e.message,true); }
+  finally{ spin(this,false); }
+};
+
+load(); loadSupplies();
+</script>
+</body>
+</html>
