@@ -2,8 +2,8 @@
 """Samsung SCX-4623fw USB 真机验证（只读查询，无副作用）
 
 用法（二选一）：
-  sudo -u fn-scx4623 python3 /home/HH0113/fn-scx4623/test_usb.py
-  sudo python3 /home/HH0113/fn-scx4623/test_usb.py
+  sudo -u fn-scx4623 python3 /vol1/1000/fn-scx4623/test_usb.py
+  sudo python3 /vol1/1000/fn-scx4623/test_usb.py
 
 只发 3 类 vendor IN 查询（EPM 轮询用的同款命令），不做任何写操作。
 """
