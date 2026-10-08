@@ -244,7 +244,37 @@ def do_scan(dpi=200, mode="Color", pages=1, title="", want_pdf=True):
 
 
 # ---------------------------------------------------------------- 打印
-def do_print(path, copies=1, printer=None):
+def cups_options(printer=None):
+    """解析 `lpoptions -p <打印机> -l` → {Key: {label, choices, default}}
+
+    行格式:  Key/Label: choice1 choice2 *default choice4
+    动态获取，换打印机自动适配；解析失败返回 {}（UI 隐藏该区）。
+    """
+    pr = printer or PRINTER
+    if not pr:
+        return {}
+    rc, out, _ = run(["lpoptions", "-p", pr, "-l"], timeout=10)
+    if rc != 0:
+        return {}
+    opts = {}
+    for line in (out or "").splitlines():
+        m = re.match(r"^([A-Za-z][\w]*)/([^:]+):\s*(.+)$", line.strip())
+        if not m:
+            continue
+        key, label, rest = m.group(1), m.group(2).strip(), m.group(3)
+        choices, default = [], None
+        for tok in rest.split():
+            if tok.startswith("*"):
+                default = tok[1:]
+                choices.append(default)
+            else:
+                choices.append(tok)
+        if choices:
+            opts[key] = {"label": label, "choices": choices, "default": default}
+    return opts
+
+
+def do_print(path, copies=1, printer=None, options=None):
     pr = printer or PRINTER
     if not pr:
         raise RuntimeError("未配置打印机")
@@ -254,6 +284,16 @@ def do_print(path, copies=1, printer=None):
     cmd = ["lp", "-d", pr]
     if copies > 1:
         cmd += ["-n", str(copies)]
+    # 打印参数（CUPS -o）：严格白名单 —— 键与值都必须来自 lpoptions -l
+    if options:
+        allowed = cups_options(pr)
+        for k, v in options.items():
+            a = allowed.get(str(k))
+            if not a:
+                continue
+            sv = str(v)
+            if sv in a["choices"]:
+                cmd += ["-o", f"{k}={sv}"]
     cmd.append(path)
     rc, out, err = run(cmd, timeout=PRINT_TIMEOUT)
     if rc != 0:
@@ -345,6 +385,10 @@ class Handler(BaseHTTPRequestHandler):
                     "scans": len(read_index()),
                     "port": self.server.server_address[1],
                 })
+
+            if path == "/api/cups-options":
+                return self._send(200, {"ok": True, "printer": PRINTER,
+                                        "options": cups_options()})
 
             if path == "/api/scans":
                 return self._send(200, {"ok": True, "items": read_index()})
@@ -496,7 +540,17 @@ class Handler(BaseHTTPRequestHandler):
             out.write(raw)
         try:
             copies = int((form.getvalue("copies") or 1))
-            res = do_print(path, copies=copies)
+            # 可选 options 字段：JSON 字符串 {"Resolution":"600dpi","EconoMode":"ON"}
+            opts = {}
+            raw_opts = form.getvalue("options")
+            if raw_opts:
+                try:
+                    parsed = json.loads(raw_opts)
+                    if isinstance(parsed, dict):
+                        opts = {str(k): str(v) for k, v in parsed.items()}
+                except Exception:
+                    opts = {}
+            res = do_print(path, copies=copies, options=opts)
         except Exception as e:
             try:
                 os.unlink(path)

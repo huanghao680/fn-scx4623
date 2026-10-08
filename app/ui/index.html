@@ -9,6 +9,20 @@
   --bg:#f4f6f9;--card:#fff;--ink:#1c2430;--sub:#6b7686;--line:#e4e8ee;
   --brand:#2563eb;--brand-d:#1d4ed8;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;
   --r:14px;--sh:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05);
+  /* 硬编码色的变量化（暗色模式统一覆盖） */
+  --pill-bg:#eef2f7;--tabs-bg:#eceff4;--tab-on:#fff;--input-bg:#fff;
+  --ghost-bg:#fff;--ghost-h:#f6f8fa;--drop-bg:#fbfcfe;--drop-h:#f0f5ff;
+  --note-bg:#f7f9fc;--sitem-bg:#fff;--ph-bg:#eef1f5;--track-bg:#e9edf3;
+  --na-bg:#c3cad4;--tag-bg:#eef2f7;--tag-ok-bg:#e7f6ec;--tag-warn-bg:#fdf3e3;
+}
+:root[data-theme=dark]{
+  --bg:#0d1117;--card:#161b22;--ink:#e6edf3;--sub:#8b949e;--line:#2a313c;
+  --brand:#4d9dff;--brand-d:#6db0ff;--ok:#3fb950;--warn:#d29922;--bad:#f85149;
+  --sh:0 1px 3px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.4);
+  --pill-bg:#21262d;--tabs-bg:#010409;--tab-on:#1c2128;--input-bg:#0d1117;
+  --ghost-bg:#161b22;--ghost-h:#21262d;--drop-bg:#12171d;--drop-h:#101c2e;
+  --note-bg:#12171d;--sitem-bg:#161b22;--ph-bg:#0d1117;--track-bg:#21262d;
+  --na-bg:#30363d;--tag-bg:#21262d;--tag-ok-bg:#12261a;--tag-warn-bg:#2b2312;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
@@ -17,24 +31,24 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .wrap{max-width:920px;margin:0 auto;padding:18px 16px 60px}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
 h1{font-size:19px;margin:0;letter-spacing:-.2px}
-.pill{font-size:12px;padding:4px 10px;border-radius:999px;background:#eef2f7;color:var(--sub);
+.pill{font-size:12px;padding:4px 10px;border-radius:999px;background:var(--pill-bg);color:var(--sub);
   display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--sub);flex:none}
 .dot.on{background:var(--ok)}.dot.off{background:var(--bad)}.dot.busy{background:var(--warn)}
 
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   box-shadow:var(--sh);padding:18px;margin-bottom:16px}
-.tabs{display:flex;gap:6px;background:#eceff4;padding:5px;border-radius:12px;margin-bottom:18px}
+.tabs{display:flex;gap:6px;background:var(--tabs-bg);padding:5px;border-radius:12px;margin-bottom:18px}
 .tab{flex:1;text-align:center;padding:10px 6px;border-radius:9px;cursor:pointer;font-size:14.5px;
   font-weight:600;color:var(--sub);border:0;background:transparent;transition:.15s;user-select:none}
-.tab.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.tab.on{background:var(--tab-on);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .pane{display:none}.pane.on{display:block}
 
 .row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
 .field{flex:1;min-width:150px}
 label{display:block;font-size:12.5px;color:var(--sub);margin-bottom:6px;font-weight:600}
 select,input[type=number],input[type=text]{width:100%;padding:9px 11px;border:1px solid var(--line);
-  border-radius:9px;font-size:14.5px;background:#fff;color:var(--ink);outline:none}
+  border-radius:9px;font-size:14.5px;background:var(--input-bg);color:var(--ink);outline:none}
 select:focus,input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
 .chk{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--ink);padding-top:22px}
 .chk input{width:16px;height:16px;accent-color:var(--brand)}
@@ -44,21 +58,21 @@ select:focus,input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,
   background:var(--brand);color:#fff}
 .btn:hover{background:var(--brand-d)}
 .btn:disabled{opacity:.55;cursor:not-allowed}
-.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
-.btn.ghost:hover{background:#f6f8fa}
+.btn.ghost{background:var(--ghost-bg);color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--ghost-h)}
 .btn.sm{padding:7px 13px;font-size:13.5px;border-radius:8px}
 .btn.danger{background:#fff;color:var(--bad);border:1px solid #fecaca}
 .btn.danger:hover{background:#fef2f2}
 .btn.full{width:100%;padding:14px;font-size:16px}
 
 .drop{border:2px dashed var(--line);border-radius:12px;padding:34px 16px;text-align:center;
-  color:var(--sub);cursor:pointer;transition:.15s;background:#fbfcfe}
-.drop:hover,.drop.over{border-color:var(--brand);background:#f0f5ff;color:var(--brand)}
+  color:var(--sub);cursor:pointer;transition:.15s;background:var(--drop-bg)}
+.drop:hover,.drop.over{border-color:var(--brand);background:var(--drop-h);color:var(--brand)}
 .drop b{display:block;font-size:15.5px;color:var(--ink);margin-bottom:5px}
 .drop.over b{color:var(--brand)}
 .fname{margin-top:10px;font-size:13.5px;color:var(--brand);font-weight:600;word-break:break-all}
 
-.note{font-size:13px;color:var(--sub);background:#f7f9fc;border:1px solid var(--line);
+.note{font-size:13px;color:var(--sub);background:var(--note-bg);border:1px solid var(--line);
   border-radius:9px;padding:10px 12px;margin-top:12px}
 .note b{color:var(--ink)}
 
@@ -73,14 +87,19 @@ select:focus,input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,
 @keyframes sp{to{transform:rotate(360deg)}}
 
 .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:13px}
-.sitem{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#fff;cursor:pointer;
+.sitem{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--sitem-bg);cursor:pointer;
   transition:.15s}
 .sitem:hover{border-color:var(--brand);box-shadow:0 4px 14px rgba(37,99,235,.13);transform:translateY(-2px)}
-.sitem .ph{aspect-ratio:3/4;background:#eef1f5;position:relative;overflow:hidden}
+.sitem .ph{aspect-ratio:3/4;background:var(--ph-bg);position:relative;overflow:hidden}
 .sitem .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .sitem .ph .badge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.62);color:#fff;
   font-size:11px;padding:2px 7px;border-radius:6px}
+.sitem{position:relative}
 .sitem .meta{padding:9px 10px}
+.sitem .dl{position:absolute;top:6px;left:6px;width:28px;height:28px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:15px;text-decoration:none;
+  background:rgba(0,0,0,.62);color:#fff;transition:.15s;opacity:.85}
+.sitem .dl:hover{background:var(--brand);opacity:1}
 .sitem .t{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sitem .d{font-size:11.5px;color:var(--sub);margin-top:2px}
 .empty{text-align:center;color:var(--sub);padding:40px 16px;font-size:14.5px}
@@ -105,19 +124,19 @@ select:focus,input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,
 
 .h2{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
 .h2 h2{font-size:15.5px;margin:0}
-.bar{height:9px;background:#e9edf3;border-radius:99px;overflow:hidden;margin-top:7px}
+.bar{height:9px;background:var(--track-bg);border-radius:99px;overflow:hidden;margin-top:7px}
 .bar i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:.35s}
 .bar i.warn{background:var(--warn)}
 .bar i.low{background:var(--bad)}
-.bar i.na{background:#c3cad4;width:100%!important}
+.bar i.na{background:var(--na-bg);width:100%!important}
 .sup{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .sup .nm{font-size:14.5px;font-weight:600}
 .sup .pc{font-size:20px;font-weight:700;letter-spacing:-.5px}
 .sup .pc small{font-size:12px;font-weight:600;opacity:.6}
 .sup .nt{font-size:12.5px;color:var(--sub);margin-top:5px;line-height:1.5}
-.tag{font-size:11px;padding:2px 8px;border-radius:6px;background:#eef2f7;color:var(--sub);font-weight:600}
-.tag.ok{background:#e7f6ec;color:var(--ok)}
-.tag.warn{background:#fdf3e3;color:var(--warn)}
+.tag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--tag-bg);color:var(--sub);font-weight:600}
+.tag.ok{background:var(--tag-ok-bg);color:var(--ok)}
+.tag.warn{background:var(--tag-warn-bg);color:var(--warn)}
 .form{display:none;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
 .form.on{display:flex}
 .form .field{min-width:130px}
@@ -132,7 +151,10 @@ select:focus,input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,
 <div class="wrap">
   <header>
     <h1>🖨️ 打印 · 复印 · 扫描</h1>
-    <span class="pill"><i class="dot" id="pdot"></i><span id="pstate">检测中…</span></span>
+    <span style="display:inline-flex;gap:8px;align-items:center">
+      <span class="pill"><i class="dot" id="pdot"></i><span id="pstate">检测中…</span></span>
+      <button class="btn ghost sm" id="theme-btn" title="切换深色/浅色">🌙</button>
+    </span>
   </header>
 
   <!-- 耗材 -->
@@ -172,7 +194,7 @@ select:focus,input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,
     <div class="card">
       <div class="row">
         <div class="field"><label>分辨率</label>
-          <select id="s-dpi"><option>150</option><option selected>200</option><option>300</option><option>600</option></select></div>
+          <select id="s-dpi"><option>75</option><option>100</option><option>150</option><option selected>200</option><option>300</option><option>600</option></select></div>
         <div class="field"><label>色彩</label>
           <select id="s-mode"><option value="Color">彩色</option><option value="Gray">灰度</option><option value="Lineart">黑白线条</option></select></div>
         <div class="field"><label>页数</label>
@@ -222,6 +244,7 @@ select:focus,input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,
         <div class="field"><label>份数</label>
           <select id="p-copies"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
       </div>
+      <div class="row" id="cups-opts"></div>
       <button class="btn full" id="btn-print" disabled>开始打印</button>
       <div class="note">打印文件会同时存一份到历史记录，方便回看和补打。</div>
     </div>
@@ -248,6 +271,50 @@ select:focus,input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 let files=null, cur=null, curPage=1, busy=false;
+
+/* 主题：localStorage 优先，否则跟随系统 */
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  const b=$('#theme-btn'); if(b) b.textContent = t==='dark' ? '☀️' : '🌙';
+}
+let theme = localStorage.getItem('theme')
+  || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+applyTheme(theme);
+document.addEventListener('click', e=>{
+  if(e.target && e.target.id==='theme-btn'){
+    theme = (theme==='dark') ? 'light' : 'dark';
+    try{ localStorage.setItem('theme', theme); }catch(_){}
+    applyTheme(theme);
+  }
+});
+
+/* CUPS 可调参数（从打印机 lpoptions 动态加载）*/
+async function loadCupsOpts(){
+  try{
+    const d = await api('/api/cups-options');
+    const box = $('#cups-opts'); if(!box) return;
+    const opts = d.options || {};
+    const keys = Object.keys(opts).filter(k => (opts[k].choices||[]).length > 1);
+    if(!keys.length){
+      box.innerHTML = '<div class="note" style="width:100%">未获取到打印机可调参数</div>';
+      return;
+    }
+    box.innerHTML = keys.map(k=>{
+      const o = opts[k];
+      return '<div class="field"><label>'+esc(o.label)+'</label><select data-cups="'+k+'">'
+        + o.choices.map(c=>'<option'+(c===o.default?' selected':'')+'>'+esc(c)+'</option>').join('')
+        + '</select></div>';
+    }).join('');
+  }catch(e){
+    const box = $('#cups-opts');
+    if(box) box.innerHTML = '<div class="note" style="width:100%">参数加载失败：'+esc(e.message)+'</div>';
+  }
+}
+function collectCups(){
+  const o = {};
+  $$('[data-cups]').forEach(s=>{ if(s.value) o[s.dataset.cups]=s.value; });
+  return o;
+}
 
 function toast(m,err){const t=$('#toast');t.textContent=m;t.className='show'+(err?' err':'');
   clearTimeout(t._h);t._h=setTimeout(()=>t.className='',err?4200:2200);}
@@ -329,6 +396,7 @@ $('#btn-print').onclick=async function(){
   if(!files||busy)return; busy=true; spin(this,true,'提交打印中…');
   try{
     const fd=new FormData(); fd.append('file',files); fd.append('copies',$('#p-copies').value);
+    fd.append('options', JSON.stringify(collectCups()));
     const j=await api('/api/print',{method:'POST',body:fd});
     toast('已提交打印（'+j.printer+'）');
     files=null; fileIn.value=''; $('#fname').textContent=''; $('#btn-print').disabled=true;
@@ -349,8 +417,10 @@ async function load(){
         (it.pages?`<img loading="lazy" src="/api/scans/${it.id}/thumb/1">`:'')+
         `<span class="badge">${it.pages||1} 页${it.type==='print'?' · 打印':''}</span></div>`+
         `<div class="meta"><div class="t">${esc(it.title||'未命名')}</div>
-         <div class="d">${when(it.time)}${it.dpi?' · '+it.dpi+'dpi':''}</div></div>`;
-      el.onclick=()=>open(it);
+         <div class="d">${when(it.time)}${it.dpi?' · '+it.dpi+'dpi':''}</div></div>`+
+        `<a class="dl" href="/api/scans/${it.id}/download?fmt=pdf" title="下载 PDF"
+           onclick="event.stopPropagation()" download>⬇</a>`;
+        el.onclick=()=>open(it);
       g.appendChild(el);
     });
   }catch(e){ toast(e.message,true); }
@@ -459,7 +529,7 @@ $('#sf-save').onclick=async function(){
   finally{ spin(this,false); }
 };
 
-load(); loadSupplies();
+load(); loadSupplies(); loadCupsOpts();
 </script>
 </body>
 </html>
